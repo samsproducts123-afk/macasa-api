@@ -15,12 +15,20 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-DB_URL = os.environ.get("DATABASE_URL")
+DB_URL = os.environ.get("DATABASE_URL", "")
+# Strip channel_binding param (not supported by asyncpg)
+if "channel_binding" in DB_URL:
+    import re
+    DB_URL = re.sub(r'[&?]channel_binding=[^&]*', '', DB_URL)
 
 @app.on_event("startup")
 async def startup():
     if DB_URL:
-        app.state.pool = await asyncpg.create_pool(DB_URL, min_size=1, max_size=10)
+        try:
+            app.state.pool = await asyncpg.create_pool(DB_URL, min_size=1, max_size=10, ssl="require")
+            print(f"✅ Database connected")
+        except Exception as e:
+            print(f"❌ Database connection failed: {e}")
     else:
         print("WARNING: DATABASE_URL not set")
 
