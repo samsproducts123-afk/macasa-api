@@ -15,10 +15,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-DB_URL = os.environ.get("DATABASE_URL", "")
+DB_URL = os.environ.get("DATABASE_URL", "postgresql://neondb_owner:npg_YwtF60Vkfyxg@ep-frosty-cloud-abd10p3j-pooler.eu-west-2.aws.neon.tech/neondb?sslmode=require")
 # Strip channel_binding param (not supported by asyncpg)
+import re
 if "channel_binding" in DB_URL:
-    import re
     DB_URL = re.sub(r'[&?]channel_binding=[^&]*', '', DB_URL)
 
 @app.on_event("startup")
